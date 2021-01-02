@@ -1,8 +1,11 @@
 package ch.dempsey.bedrijven.data.util;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class Bedrijf {
@@ -10,35 +13,30 @@ public class Bedrijf {
 	private int id;
 	private UUID owner;
 	private String name;
-	private double balance;
-	private String creation_date;
-	private BedrijfsType type;
 	
 	
-	protected Bedrijf(int id, UUID owner, double balance, String creation_date, int type) {
-		this.id = id;
+	protected Bedrijf(UUID owner, String name) {
 		this.owner = owner;
-		this.balance = balance;
-		this.creation_date = creation_date;
-		switch(type) {
-			case 0:
-				this.type = BedrijfsType.HANDEL;
-				break;
-			case 1:
-				this.type = BedrijfsType.ARBEID;
-				break;
-			case 2:
-				this.type = BedrijfsType.OVERHEID;
-				break;
-			default:
-				this.type = BedrijfsType.HANDEL;
-				break;
-		}	
+		this.name = name;	
 	}
 	
 	
 	public int getId() {
-		return id;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM companies WHERE name='"+name+"' AND owner_uuid='"+owner.toString()+"' AND disabled = 0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				return rs.getInt("id");
+			}
+			conn.close();
+			st.close();
+			return 0;
+		}catch(Exception e) {
+			return 0;
+		}
 	}
 	
 	public UUID getOwner() {
@@ -51,23 +49,72 @@ public class Bedrijf {
 	}
 	
 	public double getBalance() {
-		return balance;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM companies WHERE name='"+name+"' AND owner_uuid='"+owner.toString()+"' AND disabled = 0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				return Double.valueOf(rs.getInt("id"));
+			}
+			conn.close();
+			st.close();
+			return 0;
+		}catch(Exception e) {
+			return 0;
+		}
 	}
 	
 	
 	public String getCreationDate() {
-		return creation_date;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM companies WHERE name='"+name+"' AND owner_uuid='"+owner.toString()+"' AND disabled = 0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				return rs.getTimestamp("creation_date").toString();
+			}
+			conn.close();
+			st.close();
+			return null;
+		}catch(Exception e) {
+			return null;
+		}
 	}
 	
 	public BedrijfsType getType() {
-		return type;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM companies WHERE name='"+name+"' AND owner_uuid='"+owner.toString()+"' AND disabled = 0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				switch(rs.getInt("type" )) {
+					case 1:
+						return BedrijfsType.ARBEID;
+					case 2:
+						return BedrijfsType.OVERHEID;
+					default:
+						return  BedrijfsType.HANDEL;
+				}
+			}
+			conn.close();
+			st.close();
+			return BedrijfsType.HANDEL;
+		}catch(Exception e) {
+			return BedrijfsType.HANDEL;
+		}
 	}
 	
 	
 	public void setBalance(double balance) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bedrijven", "root", "");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
 			String sql = "UPDATE bedrijven SET balance="+String.valueOf(balance)+" WHERE id="+String.valueOf(id);
 			PreparedStatement st = conn.prepareStatement(sql);
 			if(st.execute()) {
@@ -75,6 +122,75 @@ public class Bedrijf {
 			}
 			st.close();
 			conn.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ArrayList<Werknemer> getWerknemers() {
+		ArrayList<Werknemer> emp = new ArrayList<Werknemer>();
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM werknemers WHERE company_id = "+String.valueOf(getId())+" AND disabled = 0 ";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			while(rs.next()) {
+				Werknemer werk = new Werknemer(UUID.fromString(rs.getString("user_uuid")), rs.getInt("company_id"));
+				emp.add(werk);
+			}
+			st.close();
+			conn.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return emp;
+	}
+	
+	public void hireWerknemer(UUID user, double pay, WerknemersRol role) {
+		try {
+			
+			Date d = new Date(System.currentTimeMillis());
+			String now = String.valueOf(d.getYear())+"-"+String.valueOf(d.getMonth()+1)+"-"+String.valueOf(d.getDate());
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			int rs;
+			switch(role) {
+				case TEAM_LEADER:
+					rs = 1;
+					break;
+				case ADMINSTRATOR:
+					rs = 2;
+					break;
+				case EIGENAAR:
+					rs = 3;
+					break;
+				default:
+					rs = 0;
+					break;
+			}
+			String sql = "INSERT INTO werknemers (id, user_uuid, company_id, role, pay, hiring_date, disabled) VALUES (NULL, "+user.toString()+", "+getId()+", "+role+", "+pay+", "+now+", 0)";
+			PreparedStatement st = conn.prepareStatement(sql);
+			if(st.execute()) {
+				System.out.println("Company " + name + " has hired a new employee!");
+			}
+			st.close();
+			conn.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void fireWerknemer(UUID user) {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "UPDATE werknemers SET disabled = 1 WHERE user_uuid='"+user.toString()+"' AND company_id='"+getId()+"' AND disabled = 0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.execute();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
