@@ -29,7 +29,10 @@ public class Werknemer {
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet rs = st.executeQuery();
 			if(rs.next()) {
-				return rs.getInt("id");
+				int ids = rs.getInt("id");
+				st.close();
+				conn.close();
+				return ids;
 			}
 			conn.close();
 			st.close();
@@ -72,6 +75,37 @@ public class Werknemer {
 			return WerknemersRol.WERKNEMER;
 		}catch(Exception e) {
 			return WerknemersRol.WERKNEMER;
+		}
+	}
+	
+	public void setRole(WerknemersRol role) {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			int r;
+			switch(role) {
+				case TEAM_LEADER:
+					r = 1;
+					break;
+				case ADMINSTRATOR:
+					r = 2;
+					break;
+				case EIGENAAR:
+					r = 3;
+					break;
+				default:
+					r = 0;
+					break;
+			}
+			String sql = "UPDATE werknemers SET role="+String.valueOf(r)+" WHERE user_uuid = '"+user.toString()+"' AND company_id="+String.valueOf(getCompanyId())+"";
+			PreparedStatement st = conn.prepareStatement(sql);
+			if(st.execute()) {
+				System.out.println("Updated role for " + user.toString());
+			}
+			st.close();
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("Failed to update role  for " + user.toString());
 		}
 	}
 	

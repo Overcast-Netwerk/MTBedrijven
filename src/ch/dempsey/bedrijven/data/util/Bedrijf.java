@@ -191,6 +191,8 @@ public class Bedrijf {
 			String sql = "UPDATE werknemers SET disabled = 1 WHERE user_uuid='"+user.toString()+"' AND company_id='"+getId()+"' AND disabled = 0";
 			PreparedStatement st = conn.prepareStatement(sql);
 			st.execute();
+			st.close();
+			conn.close();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
