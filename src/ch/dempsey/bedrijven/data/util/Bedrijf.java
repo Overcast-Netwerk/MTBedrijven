@@ -150,6 +150,47 @@ public class Bedrijf {
 		return emp;
 	}
 	
+	public boolean isWerknemer(Werknemer werknemer) {
+		return getWerknemers().contains(werknemer);
+	}
+	
+	public void createFactuur(UUID client, UUID creator, int price, String description) {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "INSERT INTO facturen (id, company_id, client_uuid, price, description, paid, creation_date, disabled, creator_uuid)"
+					+ " VALUES (NULL, "+String.valueOf(getId())+", '"+client.toString()+"', "+String.valueOf(price)+", '"+description+", 0, null, 0, '"+creator.toString()+"')";
+			PreparedStatement st = conn.prepareStatement(sql);
+			if(st.execute()) {
+				System.out.println("Created a new invoice for company: " + getId());
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ArrayList<Factuur> getFacturen(){
+		ArrayList<Factuur> facturen = new ArrayList<Factuur>();
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
+			String sql = "SELECT * FROM facturen WHERE company_id="+String.valueOf(getId())+" AND disabled=0";
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+			while(rs.next()) {
+				Factuur f = new Factuur(rs.getInt("company_id"), rs.getInt("id"));
+				facturen.add(f);
+			}
+			st.close();
+			conn.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return facturen;
+	}
+	
 	public void hireWerknemer(UUID user, double pay, WerknemersRol role) {
 		try {
 			
