@@ -164,6 +164,9 @@ public class Bedrijf {
 			if(st.execute()) {
 				System.out.println("Created a new invoice for company: " + getId());
 			}
+			
+			conn.close();
+			st.close();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

@@ -1,0 +1,4 @@
+name: MTBedrijven
+version: 1.0
+main: ch.dempsey.bedrijven.Bedrijven
+author: Dempsey
