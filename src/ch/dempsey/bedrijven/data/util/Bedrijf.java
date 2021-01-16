@@ -159,7 +159,7 @@ public class Bedrijf {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
 			String sql = "INSERT INTO facturen (id, company_id, client_uuid, price, description, paid, creation_date, disabled, creator_uuid)"
-					+ " VALUES (NULL, "+String.valueOf(getId())+", '"+client.toString()+"', "+String.valueOf(price)+", '"+description+", 0, null, 0, '"+creator.toString()+"')";
+					+ " VALUES (NULL, "+String.valueOf(getId())+", '"+client.toString()+"', "+String.valueOf(price)+", '"+description+"', 0, null, 0, '"+creator.toString()+"')";
 			PreparedStatement st = conn.prepareStatement(sql);
 			if(st.execute()) {
 				System.out.println("Created a new invoice for company: " + getId());
@@ -198,7 +198,7 @@ public class Bedrijf {
 		try {
 			
 			Date d = new Date(System.currentTimeMillis());
-			String now = String.valueOf(d.getYear())+"-"+String.valueOf(d.getMonth()+1)+"-"+String.valueOf(d.getDate());
+			String now = "20"+String.valueOf(d.getYear()-100)+"-"+String.valueOf(d.getMonth()+1)+"-"+String.valueOf(d.getDate());
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
 			int rs;
@@ -216,7 +216,7 @@ public class Bedrijf {
 					rs = 0;
 					break;
 			}
-			String sql = "INSERT INTO werknemers (id, user_uuid, company_id, role, pay, hiring_date, disabled) VALUES (NULL, "+user.toString()+", "+getId()+", "+role+", "+pay+", "+now+", 0)";
+			String sql = "INSERT INTO werknemers (id, user_uuid, company_id, role, pay, hiring_date, disabled) VALUES (NULL, '"+user.toString()+"', "+getId()+", "+role+", "+pay+", '"+now+"', 0)";
 			PreparedStatement st = conn.prepareStatement(sql);
 			if(st.execute()) {
 				System.out.println("Company " + name + " has hired a new employee!");

@@ -17,7 +17,7 @@ public class BAPI {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(Info.url, Info.username, Info.password);
-			String sql = "SELECT * FROM bedrijven WHERE owner_uuid='"+player.getUniqueId().toString()+"' AND disabled = 0)";
+			String sql = "SELECT * FROM bedrijven WHERE owner_uuid='"+player.getUniqueId().toString()+"' AND disabled = 0";
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet rs = st.executeQuery();
 			while(rs.next()) {
@@ -70,7 +70,7 @@ public class BAPI {
 			}
 			Date d = new Date(System.currentTimeMillis());
 			String now = String.valueOf(d.getYear())+"-"+String.valueOf(d.getMonth()+1)+"-"+String.valueOf(d.getDate());
-			String sql = "INSERT INTO bedrijven (id, owner_uuid, balance, creation_date, disabled, type) VALUES (NULL, '"+player.getUniqueId().toString()+"' '"+name+"', "+String.valueOf(balance)+", "+now+", 0, "+String.valueOf(t)+")";
+			String sql = "INSERT INTO bedrijven (id, owner_uuid, name, balance, creation_date, disabled, type) VALUES (NULL, '"+player.getUniqueId().toString()+"', '"+name+"', "+String.valueOf(balance)+", "+now+", 0, "+String.valueOf(t)+")";
 			PreparedStatement st = conn.prepareStatement(sql);
 			if(st.execute()) {
 				System.out.println("New company registered with name: " + name); 

@@ -6,7 +6,7 @@ public class Bedrijven extends JavaPlugin {
 	
 	
 	public void onEnable() {
-		
+		getLogger().info("Spinning up.....");
 	}
 	
 	
